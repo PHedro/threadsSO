@@ -5,7 +5,8 @@ import random
 
 #semaforo file_lock a lib de thread faz o controle por si nao precisa de
 # interferencia do usuario quando nao e possivel adquirir o lock
-file_lock = thread.allocate_lock()
+file_lock_read = thread.allocate_lock()
+file_lock_write = thread.allocate_lock()
 
 
 def sleep(process):
@@ -17,7 +18,7 @@ def sleep(process):
 
 def read(reader_number):
     print 'Leitor {0} tentando adquirir semaforo file_lock'.format(reader_number)
-    if file_lock.acquire():
+    if file_lock_read.acquire():
         #abre arquivo para leitura
         file_locked = open('text1', 'r')
         content = file_locked.read()
@@ -26,7 +27,7 @@ def read(reader_number):
         print 'Arquivo lido pelo Leitor {0} liberando file_lock'.format(reader_number)
         #aguarda um pouco pra liberar o file_lock
         sleep('Leitor {0}'.format(reader_number))
-        file_lock.release()
+        file_lock_read.release()
     else:
         print 'Arquivo bloqueado para Leitor {0}'.format(reader_number)
     sleep('Leitor {0}'.format(reader_number))
@@ -49,7 +50,7 @@ def reader_3():
 
 def write(writer_number):
     print 'Escritor {0} tentando adquirir semaforo file_lock'.format(writer_number)
-    if file_lock.acquire():
+    if file_lock_read.acquire() and file_lock_write.acquire():
         #abre arquivo para leitura
         file_locked = open('text1', 'r')
         content = file_locked.readlines()
@@ -63,7 +64,8 @@ def write(writer_number):
         print 'Arquivo lido pelo Escritor {0} liberando file_lock'.format(writer_number)
         #espera um pouco antes de liberar o file_lock
         sleep('Escritor {0}'.format(writer_number))
-        file_lock.release()
+        file_lock_read.release()
+        file_lock_write.release()
     else:
         print 'Arquivo bloqueado para Escritor {0}'.format(writer_number)
     sleep('Escritor {0}'.format(writer_number))
